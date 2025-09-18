@@ -17,4 +17,7 @@ Here we have validate the test case and generate newman report. (If need more sp
   ```bash 
   npx newman run [collection secret key]
   ```
-
+## API Documentation [API Document File](https://documenter.getpostman.com/view/25113210/2sB3HnKf8e) 
+## Newman Report [Just DRAG AND DROP]
+![n1](https://github.com/user-attachments/assets/89c2a676-f59b-49bc-9627-264e76fa48de)
+![n2](https://github.com/user-attachments/assets/a7caf1b0-c7b1-4f00-ae12-e7af672f1fcf)

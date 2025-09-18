@@ -9,4 +9,12 @@ Here we have validate the test case and generate newman report. (If need more sp
 
 ## How to run this project
 - ```Clone This Project``` [Employee API Project](https://github.com/khundakerfaisal/EmployeeAPIProject)
+- ```Hit The Command```
+  ```bash
+  npm i newman
+  ```
+  --This is facilate to copy button enble
+  ```bash 
+  npx newman run [collection secret key]
+  ```
 

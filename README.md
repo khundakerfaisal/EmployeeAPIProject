@@ -10,14 +10,25 @@ Here we have validate the test case and generate newman report. (If need more sp
 ## How to run this project
 - ```Clone This Project``` [Employee API Project](https://github.com/khundakerfaisal/EmployeeAPIProject)
 - ```Hit The Command```
-  ```bash
-  npm i newman
-  ```
-  --This is facilate to copy button enble
-  ```bash 
-  npx newman run [collection secret key]
-  ```
+ 
 ## API Documentation [API Document File](https://documenter.getpostman.com/view/25113210/2sB3HnKf8e) 
 ## Newman Report [Just DRAG AND DROP]
-![n1](https://github.com/user-attachments/assets/89c2a676-f59b-49bc-9627-264e76fa48de)
-![n2](https://github.com/user-attachments/assets/a7caf1b0-c7b1-4f00-ae12-e7af672f1fcf)
+## API Request
+     'POST   /api/auth/login           - Login and get Bearer token',
+    'GET    /api/auth/verify          - Verify token',
+    'GET    /api/employees            - Get all employees',
+    'GET    /api/employees/:id        - Get employee by ID',
+    'POST   /api/employees            - Create new employee',
+    'PUT    /api/employees/:id        - Update employee (full)',
+    'PATCH  /api/employees/:id        - Update employee (partial)',
+    'DELETE /api/employees/:id        - Delete employee (soft delete)',
+    'DELETE /api/employees/:id?permanent=true - Permanent delete',
+## Query PARAM
+'GET /api/employees?id=1'
+'GET /api/employees?id=1,2,3,4,5	'
+'GET /api/employees?department=Engineering	'
+'GET /api/employees?phone=0215151	'
+'GET /api/employees?email=a@yahoo.com	'
+'GET /api/employees?id=1&phone=0215151	'
+'GET /api/employees?id=1&phone=0215151&email=a@yahoo.com	'
+'GET /api/employees?department=Engineering'

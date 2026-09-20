@@ -1,0 +1,23 @@
+## Employee API With Newman Report 
+## Prerequisite
+- Postman
+- NodeJS
+- Visual Studio Code
+## About This Project
+This is Employee API collection automation project.Here we have Create,update,get data and delete Employee information with assertion.
+Here we have validate the test case and generate newman report. (If need more specific details write here about the project section)
+
+## How to run this project
+- ```Clone This Project``` [Employee API Project](https://github.com/khundakerfaisal/EmployeeAPIProject)
+- ```Hit The Command```
+  ```bash
+  npm i newman
+  ```
+  --This is facilate to copy button enble
+  ```bash 
+  npx newman run [collection secret key]
+  ```
+## API Documentation [API Document File](https://documenter.getpostman.com/view/25113210/2sB3HnKf8e) 
+## Newman Report [Just DRAG AND DROP]
+![n1](https://github.com/user-attachments/assets/89c2a676-f59b-49bc-9627-264e76fa48de)
+![n2](https://github.com/user-attachments/assets/a7caf1b0-c7b1-4f00-ae12-e7af672f1fcf)

@@ -5,7 +5,8 @@
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "node server.js",
+    "json:serve": "json-server --watch db/db.json --port 4000 --host 0.0.0.0"
   },
   "keywords": [],
   "author": "",
@@ -14,6 +15,7 @@
     "bcrypt": "^6.0.0",
     "cors": "^2.8.5",
     "express": "^5.1.0",
+    "json-server": "^0.17.4",
     "jsonwebtoken": "^9.0.2",
     "localtunnel": "^2.0.2"
   }

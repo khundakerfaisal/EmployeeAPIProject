@@ -2,6 +2,9 @@
 // Node.js + Express + JWT
 
 const express = require('express');
+const path = require('path');
+const fs = require('fs');
+const jsonServer = require('json-server');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const cors = require('cors');
@@ -13,7 +16,70 @@ const JWT_EXPIRES_IN = '24h';
 
 // Middleware
 app.use(cors());
-app.use(express.json());
+app.use(express.json({
+  verify: (req, res, buf, encoding) => {
+    try {
+      req.rawBody = buf.toString(encoding || 'utf8');
+    } catch (_) {
+      req.rawBody = undefined;
+    }
+  }
+}));
+app.use(express.urlencoded({ extended: true }));
+app.use(express.text({ type: ['text/*'] }));
+
+// If body came as text/plain but contains JSON, parse it into an object
+app.use((req, res, next) => {
+  if (typeof req.body === 'string') {
+    const trimmed = req.body.trim();
+    if ((trimmed.startsWith('{') && trimmed.endsWith('}')) || (trimmed.startsWith('[') && trimmed.endsWith(']'))) {
+      try {
+        req.body = JSON.parse(trimmed);
+      } catch (_) {
+        // leave as string if parsing fails; JSON error handler below will respond
+      }
+    }
+  }
+  next();
+});
+
+// Recover from JSON parse errors by re-parsing raw body or falling back to form parsing
+app.use((err, req, res, next) => {
+  const isParseError = (err && (err.type === 'entity.parse.failed' || err instanceof SyntaxError)) && (err.status === 400 || err.statusCode === 400);
+  if (!isParseError) return next(err);
+
+  if (typeof req.rawBody === 'string') {
+    const fixedQuotes = req.rawBody.replace(/[“”]/g, '"').replace(/[‘’]/g, "'");
+    const trimmed = fixedQuotes.trim();
+    try {
+      if ((trimmed.startsWith('{') && trimmed.endsWith('}')) || (trimmed.startsWith('[') && trimmed.endsWith(']'))) {
+        req.body = JSON.parse(trimmed);
+        return next();
+      }
+    } catch (_) {}
+
+    try {
+      // Fallback: parse as URL-encoded string
+      if (trimmed.includes('=') && (trimmed.includes('&') || trimmed.includes('='))) {
+        const params = new URLSearchParams(trimmed);
+        const obj = Object.fromEntries(params.entries());
+        if (Object.keys(obj).length > 0) {
+          req.body = obj;
+          return next();
+        }
+      }
+    } catch (_) {}
+  }
+
+  return res.status(400).json({
+    error: 'Invalid request body',
+    message: 'Could not parse body. Send valid JSON with Content-Type: application/json, or form data as application/x-www-form-urlencoded.',
+    examples: {
+      json: { username: 'admin', password: 'admin123' },
+      form: 'username=admin&password=admin123'
+    }
+  });
+});
 
 // Mock Users Database (for authentication)
 const users = [
@@ -125,6 +191,31 @@ const requireAdmin = (req, res, next) => {
 
 // ============ AUTHENTICATION ENDPOINTS ============
 
+// GET / - Basic info for browser visitors
+app.get('/', (req, res) => {
+  res.json({
+    message: 'Employee API',
+    health: '/api/health',
+    login: {
+      method: 'POST',
+      path: '/api/auth/login',
+      body: { username: 'admin', password: 'admin123' }
+    }
+  });
+});
+
+// GET /api/auth/login - Informational (browser-friendly)
+app.get('/api/auth/login', (req, res) => {
+  res.status(405).json({
+    error: 'Method not allowed',
+    message: 'Use POST /api/auth/login with JSON body { "username", "password" }',
+    example: {
+      username: 'admin',
+      password: 'admin123'
+    }
+  });
+});
+
 // POST /api/auth/login - Login and get Bearer token
 app.post('/api/auth/login', async (req, res) => {
   console.log('Login attempt:', req.body);
@@ -194,15 +285,32 @@ app.get('/api/auth/verify', authenticateToken, (req, res) => {
 
 // GET /api/employees - Get all employees
 app.get('/api/employees', authenticateToken, (req, res) => {
-  const { page = 1, limit = 10, department, status = 'active' } = req.query;
-  
-  let filteredEmployees = employees.filter(emp => emp.status === status);
-  
-  if (department) {
-    filteredEmployees = filteredEmployees.filter(emp => 
-      emp.department.toLowerCase().includes(department.toLowerCase())
-    );
-  }
+  const { page = 1, limit = 10, ...searchParams } = req.query;
+  const filters = searchParams;
+
+  const filteredEmployees = employees.filter(employee =>
+    Object.entries(filters).every(([field, value]) => {
+      if (value === undefined || value === '') {
+        return true;
+      }
+
+      if (!Object.prototype.hasOwnProperty.call(employee, field)) {
+        return false;
+      }
+
+      const requestedValues = (Array.isArray(value) ? value : [value])
+        .flatMap(requestedValue => String(requestedValue).split(','))
+        .map(requestedValue => requestedValue.trim())
+        .filter(Boolean);
+      const employeeValue = employee[field];
+
+      return requestedValues.some(requestedValue =>
+        field === 'id' || field === 'salary'
+          ? Number(employeeValue) === Number(requestedValue)
+          : String(employeeValue).toLowerCase().includes(requestedValue.toLowerCase())
+      );
+    })
+  );
   
   const startIndex = (page - 1) * limit;
   const endIndex = startIndex + parseInt(limit);
@@ -489,16 +597,34 @@ app.get('/api/health', (req, res) => {
     endpoints: {
       auth: '/api/auth/login',
       employees: '/api/employees',
-      stats: '/api/employees/stats/summary'
+      stats: '/api/employees/stats/summary',
+      json: '/json'
     }
   });
 });
 
-// Error handler
+// ============ JSON SERVER (Mock DB) ============
+// Mount a local json-server using db/db.json at /json if the file exists
+try {
+  const dbFilePath = path.join(__dirname, 'db', 'db.json');
+  if (fs.existsSync(dbFilePath)) {
+    const jsonMiddlewares = jsonServer.defaults();
+    const jsonRouter = jsonServer.router(dbFilePath);
+    app.use('/json', jsonMiddlewares, jsonRouter);
+    console.log(`\n📚 JSON mock API mounted at /json using ${dbFilePath}`);
+  } else {
+    console.log('\nℹ️  db/db.json not found; JSON mock API not mounted.');
+  }
+} catch (e) {
+  console.log('\n⚠️  Failed to mount JSON mock API:', e.message);
+}
+
+// Error handler (preserve provided status codes like 400)
 app.use((err, req, res, next) => {
   console.error('Server error:', err);
-  res.status(500).json({
-    error: 'Internal server error',
+  const status = err.status || err.statusCode || 500;
+  res.status(status).json({
+    error: status >= 500 ? 'Internal server error' : 'Request error',
     message: err.message
   });
 });

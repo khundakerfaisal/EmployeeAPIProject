@@ -467,24 +467,6 @@ app.put('/api/employees/:id', authenticateToken, requireAdmin, (req, res) => {
     });
   }
 
-  let normalizedPhone = employees[employeeIndex].phone;
-  if (phone !== undefined) {
-    normalizedPhone = normalizeBangladeshPhone(phone);
-    if (!normalizedPhone) {
-      return res.status(400).json({
-        error: 'Invalid Bangladesh phone number',
-        message: 'Phone must be a Bangladesh mobile number, for example 01712345678 or +8801712345678'
-      });
-    }
-
-    if (findEmployeeByPhone(normalizedPhone, employees[employeeIndex].id)) {
-      return res.status(409).json({
-        error: 'Phone number already exists',
-        message: `Another employee with phone ${phone} already exists`
-      });
-    }
-  }
-  
   const {
     firstName,
     lastName,
@@ -495,6 +477,24 @@ app.put('/api/employees/:id', authenticateToken, requireAdmin, (req, res) => {
     salary,
     status
   } = req.body;
+
+  let normalizedPhone = employees[employeeIndex].phone;
+  if (phone !== undefined) {
+    normalizedPhone = normalizeBangladeshPhone(phone);
+    if (!normalizedPhone) {
+      return res.status(400).json({
+        error: 'Invalid Bangladesh phone number',
+        message: 'Phone must contain exactly 11 digits in Bangladesh format, for example 01712345678'
+      });
+    }
+
+    if (findEmployeeByPhone(normalizedPhone, employees[employeeIndex].id)) {
+      return res.status(409).json({
+        error: 'Phone number already exists',
+        message: `Another employee with phone ${phone} already exists`
+      });
+    }
+  }
   
   // Check if email is being changed and already exists
   if (email && email !== employees[employeeIndex].email) {

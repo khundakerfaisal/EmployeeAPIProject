@@ -147,6 +147,29 @@ let employees = [
 
 let nextEmployeeId = 4;
 
+const normalizeBangladeshPhone = phone => {
+  const digits = String(phone || '').replace(/\D/g, '');
+
+  if (/^01[3-9]\d{8}$/.test(digits)) {
+    return `+880${digits.slice(1)}`;
+  }
+
+  if (/^8801[3-9]\d{8}$/.test(digits)) {
+    return `+${digits}`;
+  }
+
+  return null;
+};
+
+const findEmployeeByPhone = (phone, excludedEmployeeId) => {
+  const normalizedPhone = normalizeBangladeshPhone(phone);
+
+  return normalizedPhone && employees.find(employee =>
+    employee.id !== excludedEmployeeId &&
+    normalizeBangladeshPhone(employee.phone) === normalizedPhone
+  );
+};
+
 // JWT Authentication Middleware
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
@@ -382,10 +405,25 @@ app.post('/api/employees', authenticateToken, requireAdmin, (req, res) => {
   } = req.body;
   
   // Validation
-  if (!firstName || !lastName || !email || !department || !position) {
+  if (!firstName || !lastName || !email || !phone || !department || !position) {
     return res.status(400).json({
       error: 'Missing required fields',
-      required: ['firstName', 'lastName', 'email', 'department', 'position']
+      required: ['firstName', 'lastName', 'email', 'phone', 'department', 'position']
+    });
+  }
+
+  const normalizedPhone = normalizeBangladeshPhone(phone);
+  if (!normalizedPhone) {
+    return res.status(400).json({
+      error: 'Invalid Bangladesh phone number',
+      message: 'Phone must be a Bangladesh mobile number, for example 01712345678 or +8801712345678'
+    });
+  }
+
+  if (findEmployeeByPhone(normalizedPhone)) {
+    return res.status(409).json({
+      error: 'Phone number already exists',
+      message: `Employee with phone ${phone} already exists`
     });
   }
   
@@ -404,7 +442,7 @@ app.post('/api/employees', authenticateToken, requireAdmin, (req, res) => {
     firstName,
     lastName,
     email,
-    phone: phone || '',
+    phone: normalizedPhone,
     department,
     position,
     salary: salary || 0,
@@ -437,6 +475,24 @@ app.put('/api/employees/:id', authenticateToken, requireAdmin, (req, res) => {
       message: `No employee found with ID: ${id}`
     });
   }
+
+  let normalizedPhone = employees[employeeIndex].phone;
+  if (phone !== undefined) {
+    normalizedPhone = normalizeBangladeshPhone(phone);
+    if (!normalizedPhone) {
+      return res.status(400).json({
+        error: 'Invalid Bangladesh phone number',
+        message: 'Phone must be a Bangladesh mobile number, for example 01712345678 or +8801712345678'
+      });
+    }
+
+    if (findEmployeeByPhone(normalizedPhone, employees[employeeIndex].id)) {
+      return res.status(409).json({
+        error: 'Phone number already exists',
+        message: `Another employee with phone ${phone} already exists`
+      });
+    }
+  }
   
   const {
     firstName,
@@ -466,7 +522,7 @@ app.put('/api/employees/:id', authenticateToken, requireAdmin, (req, res) => {
     firstName: firstName || employees[employeeIndex].firstName,
     lastName: lastName || employees[employeeIndex].lastName,
     email: email || employees[employeeIndex].email,
-    phone: phone !== undefined ? phone : employees[employeeIndex].phone,
+    phone: normalizedPhone,
     department: department || employees[employeeIndex].department,
     position: position || employees[employeeIndex].position,
     salary: salary !== undefined ? salary : employees[employeeIndex].salary,
@@ -513,6 +569,25 @@ app.patch('/api/employees/:id', authenticateToken, requireAdmin, (req, res) => {
       error: 'No valid fields to update',
       allowedFields: allowedFields
     });
+  }
+
+  if (updates.phone !== undefined) {
+    const normalizedPhone = normalizeBangladeshPhone(updates.phone);
+    if (!normalizedPhone) {
+      return res.status(400).json({
+        error: 'Invalid Bangladesh phone number',
+        message: 'Phone must be a Bangladesh mobile number, for example 01712345678 or +8801712345678'
+      });
+    }
+
+    if (findEmployeeByPhone(normalizedPhone, employees[employeeIndex].id)) {
+      return res.status(409).json({
+        error: 'Phone number already exists',
+        message: `Another employee with phone ${updates.phone} already exists`
+      });
+    }
+
+    updates.phone = normalizedPhone;
   }
   
   // Check email uniqueness if being updated

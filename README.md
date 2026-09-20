@@ -24,11 +24,11 @@ Here we have validate the test case and generate newman report. (If need more sp
     'DELETE /api/employees/:id        - Delete employee (soft delete)',
     'DELETE /api/employees/:id?permanent=true - Permanent delete',
 ## Query PARAM
-'GET /api/employees?id=1'
-'GET /api/employees?id=1,2,3,4,5	'
-'GET /api/employees?department=Engineering	'
-'GET /api/employees?phone=0215151	'
-'GET /api/employees?email=a@yahoo.com	'
-'GET /api/employees?id=1&phone=0215151	'
-'GET /api/employees?id=1&phone=0215151&email=a@yahoo.com	'
-'GET /api/employees?department=Engineering'
+'GET /api/employees?id=1',
+'GET /api/employees?id=1,2,3,4,5	',
+'GET /api/employees?department=Engineering	',
+'GET /api/employees?phone=0215151	',
+'GET /api/employees?email=a@yahoo.com	',
+'GET /api/employees?id=1&phone=0215151	',
+'GET /api/employees?id=1&phone=0215151&email=a@yahoo.com	',
+'GET /api/employees?department=Engineering',

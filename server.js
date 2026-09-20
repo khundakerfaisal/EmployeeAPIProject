@@ -311,6 +311,22 @@ app.get('/api/employees', authenticateToken, (req, res) => {
       );
     })
   );
+
+  if (filteredEmployees.length === 0) {
+    return res.status(404).json({
+      success: false,
+      error: 'No employees found',
+      message: 'No employees matched the supplied search criteria',
+      data: [],
+      pagination: {
+        currentPage: parseInt(page),
+        totalPages: 0,
+        totalEmployees: 0,
+        limit: parseInt(limit)
+      },
+      requestedBy: req.user.username
+    });
+  }
   
   const startIndex = (page - 1) * limit;
   const endIndex = startIndex + parseInt(limit);

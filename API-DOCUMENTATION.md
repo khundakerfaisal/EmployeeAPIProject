@@ -284,3 +284,20 @@ Authorization: Bearer YOUR_TOKEN
 | `403` | Token is invalid or user lacks permission |
 | `404` | Employee was not found |
 | `409` | Email already exists |
+
+For `GET /api/employees`, a query that matches no employees also returns `404`:
+
+```json
+{
+  "success": false,
+  "error": "No employees found",
+  "message": "No employees matched the supplied search criteria",
+  "data": [],
+  "pagination": {
+    "currentPage": 1,
+    "totalPages": 0,
+    "totalEmployees": 0,
+    "limit": 10
+  }
+}
+```

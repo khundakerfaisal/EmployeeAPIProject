@@ -106,7 +106,7 @@ let employees = [
     firstName: 'John',
     lastName: 'Doe',
     email: 'john.doe@company.com',
-    phone: '+1-555-0101',
+    phone: '01712345678',
     department: 'Engineering',
     position: 'Senior Developer',
     salary: 85000,
@@ -120,7 +120,7 @@ let employees = [
     firstName: 'Jane',
     lastName: 'Smith',
     email: 'jane.smith@company.com',
-    phone: '+1-555-0102',
+    phone: '01812345678',
     department: 'Marketing',
     position: 'Marketing Manager',
     salary: 75000,
@@ -134,7 +134,7 @@ let employees = [
     firstName: 'Mike',
     lastName: 'Johnson',
     email: 'mike.johnson@company.com',
-    phone: '+1-555-0103',
+    phone: '01912345678',
     department: 'Sales',
     position: 'Sales Representative',
     salary: 55000,
@@ -148,17 +148,8 @@ let employees = [
 let nextEmployeeId = 4;
 
 const normalizeBangladeshPhone = phone => {
-  const digits = String(phone || '').replace(/\D/g, '');
-
-  if (/^01[3-9]\d{8}$/.test(digits)) {
-    return `+880${digits.slice(1)}`;
-  }
-
-  if (/^8801[3-9]\d{8}$/.test(digits)) {
-    return `+${digits}`;
-  }
-
-  return null;
+  const value = String(phone || '');
+  return /^01[3-9]\d{8}$/.test(value) ? value : null;
 };
 
 const findEmployeeByPhone = (phone, excludedEmployeeId) => {
@@ -782,7 +773,7 @@ app.listen(PORT, () => {
      "firstName": "Alice",
      "lastName": "Brown",
      "email": "alice.brown@company.com",
-     "phone": "+1-555-0104",
+    "phone": "01612345678",
      "department": "IT",
      "position": "Software Engineer",
      "salary": 70000,

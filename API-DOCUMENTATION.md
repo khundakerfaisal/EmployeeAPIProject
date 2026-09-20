@@ -42,7 +42,7 @@ Authorization: Bearer YOUR_TOKEN
 | `firstName` | string | `John` |
 | `lastName` | string | `Doe` |
 | `email` | string | `john.doe@company.com` |
-| `phone` | string | `+1-555-0101` |
+| `phone` | string | `01712345678` |
 | `department` | string | `Engineering` |
 | `position` | string | `Senior Developer` |
 | `salary` | number | `85000` |
@@ -132,7 +132,7 @@ Success response:
     "firstName": "John",
     "lastName": "Doe",
     "email": "john.doe@company.com",
-    "phone": "+1-555-0101",
+    "phone": "01712345678",
     "department": "Engineering",
     "position": "Senior Developer",
     "salary": 85000,
@@ -161,7 +161,7 @@ Request body:
   "firstName": "Alice",
   "lastName": "Brown",
   "email": "alice.brown@company.com",
-  "phone": "+1-555-0104",
+  "phone": "01712345678",
   "department": "IT",
   "position": "Software Engineer",
   "salary": 70000,
@@ -169,7 +169,9 @@ Request body:
 }
 ```
 
-Required fields: `firstName`, `lastName`, `email`, `department`, and `position`.
+Required fields: `firstName`, `lastName`, `email`, `phone`, `department`, and `position`.
+
+The phone must contain exactly 11 digits and use Bangladesh mobile format, such as `01712345678`. Values such as `+8801712345678`, `8801712345678`, spaces, and hyphens are rejected. Phone numbers must be unique.
 
 The server automatically creates `id`, `status`, `createdAt`, and `updatedAt`.
 
@@ -192,7 +194,7 @@ Request body:
   "firstName": "John",
   "lastName": "Doe Updated",
   "email": "john.updated@company.com",
-  "phone": "+1-555-0199",
+  "phone": "01712345679",
   "department": "Engineering",
   "position": "Lead Developer",
   "salary": 90000,

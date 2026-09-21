@@ -318,11 +318,18 @@ app.get('/api/employees', authenticateToken, (req, res) => {
         .filter(Boolean);
       const employeeValue = employee[field];
 
-      return requestedValues.some(requestedValue =>
-        field === 'id' || field === 'salary'
-          ? Number(employeeValue) === Number(requestedValue)
-          : String(employeeValue).toLowerCase().includes(requestedValue.toLowerCase())
-      );
+      return requestedValues.some(requestedValue => {
+        if (field === 'id' || field === 'salary') {
+          return Number(employeeValue) === Number(requestedValue);
+        }
+
+        const normalizedEmployeeValue = String(employeeValue).toLowerCase();
+        const normalizedRequestedValue = requestedValue.toLowerCase();
+
+        return field === 'status'
+          ? normalizedEmployeeValue === normalizedRequestedValue
+          : normalizedEmployeeValue.includes(normalizedRequestedValue);
+      });
     })
   );
 

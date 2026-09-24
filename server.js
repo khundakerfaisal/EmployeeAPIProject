@@ -299,7 +299,13 @@ app.get('/api/auth/verify', authenticateToken, (req, res) => {
 
 // GET /api/employees - Get all employees
 app.get('/api/employees', authenticateToken, (req, res) => {
-  const { page = 1, limit = 10, ...searchParams } = req.query;
+  const {
+    page = 1,
+    limit = 10,
+    totalEmployees: requestedTotalEmployees,
+    totalEmployeeCount: requestedTotalEmployeeCount,
+    ...searchParams
+  } = req.query;
   const filters = searchParams;
 
   const filteredEmployees = employees.filter(employee =>

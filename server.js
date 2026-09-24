@@ -333,37 +333,24 @@ app.get('/api/employees', authenticateToken, (req, res) => {
     })
   );
 
-  if (filteredEmployees.length === 0) {
-    return res.status(404).json({
-      success: false,
-      error: 'No employees found',
-      message: 'No employees matched the supplied search criteria',
-      data: [],
-      totalEmployees: 0,
-      pagination: {
-        currentPage: parseInt(page),
-        totalPages: 0,
-        totalEmployees: 0,
-        limit: parseInt(limit)
-      },
-      requestedBy: req.user.username
-    });
-  }
-  
   const startIndex = (page - 1) * limit;
   const endIndex = startIndex + parseInt(limit);
   const paginatedEmployees = filteredEmployees.slice(startIndex, endIndex);
   
   res.json({
     success: true,
-    message: 'Employees fetched successfully',
+    message: filteredEmployees.length === 0
+      ? 'No employees matched the supplied search criteria'
+      : 'Employees fetched successfully',
     data: paginatedEmployees,
     totalEmployees: filteredEmployees.length,
+    totalEmployeeCount: employees.length,
     pagination: {
       currentPage: parseInt(page),
-      totalPages: Math.ceil(filteredEmployees.length / limit),
+      totalPages: Math.ceil(filteredEmployees.length / parseInt(limit)),
       totalEmployees: filteredEmployees.length,
-      limit: parseInt(limit)
+      limit: parseInt(limit),
+      totalEmployeeCount: employees.length
     },
     requestedBy: req.user.username
   });

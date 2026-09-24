@@ -339,6 +339,7 @@ app.get('/api/employees', authenticateToken, (req, res) => {
       error: 'No employees found',
       message: 'No employees matched the supplied search criteria',
       data: [],
+      totalEmployees: 0,
       pagination: {
         currentPage: parseInt(page),
         totalPages: 0,
@@ -357,6 +358,7 @@ app.get('/api/employees', authenticateToken, (req, res) => {
     success: true,
     message: 'Employees fetched successfully',
     data: paginatedEmployees,
+    totalEmployees: filteredEmployees.length,
     pagination: {
       currentPage: parseInt(page),
       totalPages: Math.ceil(filteredEmployees.length / limit),
